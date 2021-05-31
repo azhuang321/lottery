@@ -12,11 +12,13 @@ import (
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/mvc"
 	"math/rand"
+	"sync"
 	"time"
 )
 
 // 红包列表
-var packageList map[uint32][]uint = make(map[uint32][]uint)
+//var packageList map[uint32][]uint = make(map[uint32][]uint)
+var packageList *sync.Map = new(sync.Map)
 
 type lotteryController struct {
 	Ctx iris.Context
@@ -37,13 +39,23 @@ func main() {
 // GET http://localhost:8080/
 func (c *lotteryController) Get() map[uint32][2]int {
 	rs := make(map[uint32][2]int)
-	for id, list := range packageList {
+	//for id,list := range packageList {
+	//	var money int
+	//	for _,v :=range list {
+	//		money += int(v)
+	//	}
+	//	rs[id] = [2]int{len(list),money}
+	//}
+	packageList.Range(func(key, value interface{}) bool {
+		id := key.(uint32)
+		list := value.([]uint)
 		var money int
 		for _, v := range list {
 			money += int(v)
 		}
 		rs[id] = [2]int{len(list), money}
-	}
+		return true
+	})
 	return rs
 }
 
@@ -95,7 +107,8 @@ func (c *lotteryController) GetSet() string {
 	}
 	//红包唯一ID
 	id := r.Uint32()
-	packageList[id] = list
+	//packageList[id] = list
+	packageList.Store(id, list)
 	//红包地址
 	return fmt.Sprintf("/get?id=%d&uid=%d&num=%d", id, uid, num)
 }
@@ -110,7 +123,9 @@ func (c *lotteryController) GetGet() string {
 	if uid < 1 || id < 1 {
 		return fmt.Sprintf("")
 	}
-	list, ok := packageList[uint32(id)]
+	//list,ok := packageList[uint32(id)]
+	list1, ok := packageList.Load(uint32(id))
+	list := list1.([]int)
 	if !ok || len(list) < 1 {
 		return fmt.Sprintf("当前红包不存在，id=%d\n", id)
 	}
@@ -121,14 +136,18 @@ func (c *lotteryController) GetGet() string {
 	// 更新红包列表中的信息
 	if len(list) > 1 {
 		if i == len(list)-1 {
-			packageList[uint32(id)] = list[:i]
+			//packageList[uint32(id)] = list[:i]
+			packageList.Store(uint32(id), list[:i])
 		} else if i == 0 {
-			packageList[uint32(id)] = list[i:]
+			//packageList[uint32(id)] = list[i:]
+			packageList.Store(uint32(id), list[i:])
 		} else {
-			packageList[uint32(id)] = append(list[:i], list[i+1:]...)
+			//packageList[uint32(id)] = append(list[:i],list[i+1:]...)
+			packageList.Store(uint32(id), append(list[:i], list[i+1:]...))
 		}
 	} else {
-		delete(packageList, uint32(id))
+		//delete(packageList,uint32(id))
+		packageList.Delete(uint32(id))
 	}
 	return fmt.Sprintf("恭喜你抢到一个红包，金额为:%d\n", money)
 }
