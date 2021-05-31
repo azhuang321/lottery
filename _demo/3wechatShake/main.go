@@ -50,6 +50,7 @@ var logger *log.Logger
 
 // 奖品列表
 var giftList []*gift
+var mu sync.Mutex
 
 type lotteryController struct {
 	Ctx iris.Context
@@ -171,6 +172,7 @@ func newApp() *iris.Application {
 
 func main() {
 	app := newApp()
+	mu = sync.Mutex{}
 	app.Run(iris.Addr(":8080"))
 }
 
@@ -194,6 +196,8 @@ func luckyCode() int32 {
 
 // 抽奖 GET http://localhost:8080/lucky
 func (c *lotteryController) GetLucky() map[string]interface{} {
+	mu.Lock()
+	defer mu.Unlock()
 	code := luckyCode()
 	ok := false
 	result := make(map[string]interface{})
