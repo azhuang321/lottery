@@ -1,5 +1,8 @@
 /**
  * 大转盘活动
+ * 每一次转动抽奖。后端计算出这次的抽奖中奖情况。并返回对应的奖品信息
+ * 线程不安全，因为获奖概率低，并发更新库存冲突很少能出现，不容易出现线程安全问题
+ * 压力测试：wrk -t10 -c100 -d5 "http://localhost:8080/prize"
  */
 package main
 
@@ -9,8 +12,11 @@ import (
 	"github.com/kataras/iris/v12/mvc"
 	"math/rand"
 	"strings"
+	"sync"
 	"time"
 )
+
+var mu sync.Mutex = sync.Mutex{}
 
 type lotteryController struct {
 	Ctx iris.Context
@@ -110,7 +116,9 @@ func (c *lotteryController) GetPrize() string {
 	if prizeRate.Total == 0 {
 		return myprize
 	} else if prizeRate.Left > 0 {
+		mu.Lock()
 		prizeRate.Left -= 1
+		mu.Unlock()
 		return myprize
 	} else {
 		myprize = "很遗憾，再来一次吧"
