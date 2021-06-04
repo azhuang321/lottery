@@ -5,6 +5,7 @@ import (
 	bootstrap "lottery/bootrap"
 	"lottery/services"
 	"lottery/web/controllers"
+	"lottery/web/middleware"
 )
 
 func Configure(b *bootstrap.Bootstrapper) {
@@ -25,4 +26,16 @@ func Configure(b *bootstrap.Bootstrapper) {
 		blackipService,
 	)
 	index.Handle(new(controllers.IndexController))
+
+	admin := mvc.New(b.Party("/admin"))
+	admin.Router.Use(middleware.BasicAuth)
+	admin.Register(
+		userService,
+		giftService,
+		codeService,
+		resultService,
+		userdayService,
+		blackipService,
+	)
+	admin.Handle(new(controllers.AdminController))
 }

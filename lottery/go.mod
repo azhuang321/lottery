@@ -15,6 +15,7 @@ require (
 	github.com/json-iterator/go v1.1.10 // indirect
 	github.com/k0kubun/colorstring v0.0.0-20150214042306-9440f1994b88 // indirect
 	github.com/kataras/golog v0.0.18 // indirect
+	github.com/kataras/iris v0.0.2
 	github.com/kataras/iris/v12 v12.1.8
 	github.com/kataras/neffos v0.0.16 // indirect
 	github.com/kr/pretty v0.2.1 // indirect
