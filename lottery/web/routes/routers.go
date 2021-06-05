@@ -38,4 +38,11 @@ func Configure(b *bootstrap.Bootstrapper) {
 		blackipService,
 	)
 	admin.Handle(new(controllers.AdminController))
+
+	adminGift := mvc.New(b.Party("/gift"))
+	adminGift.Router.Use(middleware.BasicAuth)
+	adminGift.Register(
+		giftService,
+	)
+	adminGift.Handle(new(controllers.AdminGiftController))
 }
