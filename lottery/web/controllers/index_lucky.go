@@ -29,12 +29,12 @@ func (c *IndexController) GetLucky() map[string]interface{} {
 		return rs
 	}
 	// 3.验证用户今日参与次数
-	//ok = c.checkUserday(loginuser.Uid)
-	//if !ok {
-	//	rs["code"] = 103
-	//	rs["msg"] = "今日的抽奖次数已用完，明天再来吧"
-	//	return rs
-	//}
+	ok = c.checkUserday(loginuser.Uid)
+	if !ok {
+		rs["code"] = 103
+		rs["msg"] = "今日的抽奖次数已用完，明天再来吧"
+		return rs
+	}
 	// 4.验证IP今日的参与次数
 	ip := comm.ClientIP(c.Ctx.Request())
 	ipDayNum := utils.IncrIpLuckyNum(ip)
