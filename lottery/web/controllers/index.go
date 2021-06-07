@@ -10,7 +10,7 @@ import (
 
 type IndexController struct {
 	Ctx            iris.Context
-	ServiceUser    services.UserdayService
+	ServiceUser    services.UserService
 	ServiceGift    services.GiftService
 	ServiceCode    services.CodeService
 	ServiceResult  services.ResultService
