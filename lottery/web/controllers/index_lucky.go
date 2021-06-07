@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"lottery/comm"
+	"lottery/conf"
 	"lottery/web/utils"
 )
 
@@ -28,7 +29,20 @@ func (c *IndexController) GetLucky() map[string]interface{} {
 		return rs
 	}
 	// 3.验证用户今日参与次数
+	//ok = c.checkUserday(loginuser.Uid)
+	//if !ok {
+	//	rs["code"] = 103
+	//	rs["msg"] = "今日的抽奖次数已用完，明天再来吧"
+	//	return rs
+	//}
 	// 4.验证IP今日的参与次数
+	ip := comm.ClientIP(c.Ctx.Request())
+	ipDayNum := utils.IncrIpLuckyNum(ip)
+	if ipDayNum > conf.IpLimitMax {
+		rs["code"] = 104
+		rs["msg"] = "相同IP参与次数过多，明天再来参与吧"
+		return rs
+	}
 	// 5.验证IP白名单
 	// 6.验证用户黑名单
 	// 7.获得抽奖编码
