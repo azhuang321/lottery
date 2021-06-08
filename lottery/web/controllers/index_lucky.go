@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"log"
 	"lottery/comm"
 	"lottery/conf"
 	"lottery/models"
@@ -95,5 +96,31 @@ func (c *IndexController) GetLucky() map[string]interface{} {
 		}
 		prizeGift.Gdata = code
 	}
+	// 11.记录中奖记录
+	result := models.LtResult{
+		GiftId:     prizeGift.Id,
+		GiftName:   prizeGift.Title,
+		GiftType:   prizeGift.Gtype,
+		Uid:        loginuser.Uid,
+		Username:   loginuser.Username,
+		PrizeCode:  prizeCode,
+		GiftData:   prizeGift.Gdata,
+		SysCreated: comm.NowUnix(),
+		SysIp:      ip,
+		SysStatus:  0,
+	}
+	err := c.ServiceResult.Create(&result)
+	if err != nil {
+		log.Println("index_lucky.GetLucky ServiceResult.Created err=", err)
+		rs["code"] = 209
+		rs["msg"] = "很遗憾，没有中奖，请下次再试"
+		return rs
+	}
+	if prizeGift.Gtype == conf.GtypeGiftLarge {
+		//如果中奖为实物大奖，需要将用户，ip设置成为黑名单一段时间
+		c.prizeLarge(ip, loginuser, userInfo, blackipInfo)
+	}
+	// 12.返回抽奖结果
+	rs["gift"] = prizeGift
 	return rs
 }
