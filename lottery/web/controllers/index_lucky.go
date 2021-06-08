@@ -68,7 +68,14 @@ func (c *IndexController) GetLucky() map[string]interface{} {
 		}
 	}
 	// 7.获得抽奖编码
+	prizeCode := comm.Random(10000)
 	// 8.匹配奖品是否中奖
+	prizeGift := c.prize(prizeCode, limitBlack)
+	if prizeGift == nil || prizeGift.PrizeNum < 0 || (prizeGift.PrizeNum > 0 && prizeGift.LeftNum <= 0) {
+		rs["code"] = 205
+		rs["msg"] = "很遗憾，没有中奖，请下次再试"
+		return rs
+	}
 	// 9.有限制奖品发放
 	// 10.
 	return rs
