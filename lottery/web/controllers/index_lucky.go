@@ -77,6 +77,23 @@ func (c *IndexController) GetLucky() map[string]interface{} {
 		return rs
 	}
 	// 9.有限制奖品发放
-	// 10.
+	if prizeGift.PrizeNum > 0 {
+		ok = utils.PrizeGift(prizeGift.Id, prizeGift.LeftNum)
+		if !ok {
+			rs["code"] = 207
+			rs["msg"] = "很遗憾，没有中奖，请下次再试"
+			return rs
+		}
+	}
+	// 10.不同编码的优惠券的发放
+	if prizeGift.Gtype == conf.GtypeCodeDiff {
+		code := utils.PrizeCodeDiff(prizeGift.Id, c.ServiceCode)
+		if code == "" {
+			rs["code"] = 208
+			rs["msg"] = "很遗憾，没有中奖，请下次再试"
+			return rs
+		}
+		prizeGift.Gdata = code
+	}
 	return rs
 }
