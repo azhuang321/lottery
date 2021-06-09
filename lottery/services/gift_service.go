@@ -167,7 +167,7 @@ func (s *giftService) DecrLeftNum(id, num int) (int64, error) {
 	return s.dao.DecrLeftNum(id, num)
 }
 
-// 从缓存中获取全部的奖品
+// 从缓存中获取全部的奖品 （优化）
 func (s *giftService) getAllByCache() []models.LtGift {
 	// 集群模式，redis缓存
 	key := "allgift"
@@ -224,7 +224,7 @@ func (s *giftService) getAllByCache() []models.LtGift {
 	return gifts
 }
 
-// 将奖品的数据更新到缓存
+// 将奖品的数据更新到缓存 （优化）
 func (s *giftService) setAllByCache(gifts []models.LtGift) {
 	// 集群模式，redis缓存
 	strValue := ""
@@ -257,7 +257,7 @@ func (s *giftService) setAllByCache(gifts []models.LtGift) {
 		}
 		str, err := json.Marshal(datalist)
 		if err != nil {
-			log.Println()
+			log.Println("gift_service.setAllByCache json.Marshal err=", err)
 		}
 		strValue = string(str)
 	}
